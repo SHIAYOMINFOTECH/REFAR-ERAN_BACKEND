@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
+    // Remove deprecated options
     await mongoose.connect(process.env.MONGO_URI, {
-      useCreateIndex: true, // optional: enables the creation of indexes
-      useFindAndModify: false, // optional: to avoid deprecation warnings for findAndModify
+      // No need to use 'useCreateIndex' and 'useFindAndModify' anymore
     });
     console.log('MongoDB connected');
   } catch (err) {
