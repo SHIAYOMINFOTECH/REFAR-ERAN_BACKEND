@@ -56,10 +56,17 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { mobile, password } = req.body;
 
+  // Mobile required check
   if (!mobile) {
     return res.status(400).json({ error: "Mobile number is required" });
   }
 
+  // Mobile should be exactly 10 digits
+  if (!/^\d{10}$/.test(mobile)) {
+    return res.status(400).json({ error: "Mobile number must be exactly 10 digits" });
+  }
+
+  // Password required check
   if (!password) {
     return res.status(400).json({ error: "Password is required" });
   }
@@ -68,12 +75,12 @@ const login = async (req, res) => {
     const user = await User.findOne({ mobile });
 
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: "User not found with this mobile number" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: "Incorrect password" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -93,6 +100,7 @@ const login = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 // ✅ Get Profile (NEW FUNCTION)
 const getProfile = async (req, res) => {
