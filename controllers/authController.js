@@ -31,9 +31,11 @@ const register = async (req, res) => {
 
     await newUser.save();
 
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { _id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.status(201).json({
       message: "User registered successfully",
@@ -52,47 +54,51 @@ const register = async (req, res) => {
   }
 };
 
-// ✅ Login
-const login = async (req, res) => {
-  const { mobile, password } = req.body;
+  // ✅ Login
+  const login = async (req, res) => {
+    const { mobile, password } = req.body;
 
-  if (!mobile) {
-    return res.status(400).json({ error: "Mobile number is required" });
-  }
-
-  if (!password) {
-    return res.status(400).json({ error: "Password is required" });
-  }
-
-  try {
-    const user = await User.findOne({ mobile });
-
-    if (!user) {
-      return res.status(400).json({ error: "User not found" });
+    if (!mobile) {
+      return res.status(400).json({ error: "Mobile number is required" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
+    if (!password) {
+      return res.status(400).json({ error: "Password is required" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    try {
+      const user = await User.findOne({ mobile });
 
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        mobile: user.mobile,
-        email: user.email,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
-  }
-};
+      if (!user) {
+        return res.status(400).json({ error: "User not found" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Invalid credentials" });
+      }
+
+      const token = jwt.sign(
+        { _id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          mobile: user.mobile,
+          email: user.email,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Server error" });
+    }
+  };
 
 // ✅ Get Profile (NEW FUNCTION)
 const getProfile = async (req, res) => {

@@ -1,6 +1,6 @@
 const Coin = require("../models/coinModel");
 const User = require("../models/User");
-
+const MathQuestion = require("../models/MathQuestion");
 // ✅ 1. Earn Coin API
 exports.earnCoin = async (req, res) => {
     try {
@@ -111,3 +111,55 @@ exports.redeemCoin = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+// Generate 3 random math questions
+exports.getMathQuestions = async (req, res) => {
+  try {
+    // 3 Random Questions from Database
+    const questions = await MathQuestion.aggregate([{ $sample: { size: 3 } }]);
+    res.status(200).json({ success: true, questions });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+// Submit answers from user
+exports.submitMathAnswers = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { userAnswers } = req.body;
+
+    let correctCount = 0;
+
+    for (let item of userAnswers) {
+      const questionDoc = await MathQuestion.findOne({ question: item.question });
+      if (questionDoc && questionDoc.answer === item.userAnswer) {
+        correctCount++;
+      }
+    }
+
+    if (correctCount === 3) {
+      const user = await User.findById(userId);
+      user.coins += 100;
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: "Correct! 100 coins added."
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: `${correctCount}/3 correct. Try again.`
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+
+
