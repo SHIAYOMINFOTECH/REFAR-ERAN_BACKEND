@@ -20,6 +20,11 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // VERY IMPORTANT
 
+// Add route for root URL
+app.get("/", (req, res) => {
+  res.send("Backend is live!");
+});
+
 // route
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/video", videoRoutes);
