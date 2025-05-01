@@ -10,5 +10,6 @@ router.post("/login", authController.login);
 // Protected routes (need JWT token)
 router.get("/profile", authMiddleware, authController.getProfile);
 router.put("/profile", authMiddleware, authController.updateProfile);
+router.put("/update-profile", authMiddleware, authController.updateProfile);
 
 module.exports = router;
